@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LiteBite Admin | Lucky</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'DM Sans',sans-serif;background:#f0fafa;padding:20px}
+        .container{max-width:1400px;margin:0 auto}
+        h1{font-family:'Syne',sans-serif;font-size:1.8rem;margin-bottom:10px}
+        .stats{display:flex;flex-wrap:wrap;gap:15px;margin:20px 0}
+        .stat-card{background:#fff;border-radius:14px;padding:15px 25px;border:1px solid #d8eeed;flex:1;min-width:120px;text-align:center}
+        .stat-card h3{font-size:0.8rem;text-transform:uppercase;color:#5a6b6a;margin-bottom:5px}
+        .stat-card .number{font-size:2rem;font-weight:800;font-family:'Syne',sans-serif;color:#2abfb0}
+        .order-table{background:#fff;border-radius:14px;border:1px solid #d8eeed;overflow-x:auto}
+        table{width:100%;border-collapse:collapse;font-size:0.85rem}
+        th,td{padding:12px 10px;text-align:left;border-bottom:1px solid #e2eef0;vertical-align:top}
+        th{background:#1a1a18;color:#fff}
+        .status-badge{display:inline-block;padding:4px 10px;border-radius:100px;font-size:0.7rem;font-weight:700;text-transform:uppercase}
+        .status-pending{background:#fff8e1;color:#7a6000;border:1px solid #f9d835}
+        .status-ready{background:#e8faf8;color:#1a9e91;border:1px solid #2abfb0}
+        .status-collected{background:#f0f0f0;color:#888;border:1px solid #ddd}
+        button{background:#2abfb0;border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:0.7rem;font-weight:600;cursor:pointer;margin:2px}
+        button:hover{background:#1a9e91}
+        button.btn-collected{background:#e74c3c}
+        button.btn-collected:hover{background:#c0392b}
+        .sync-btn{background:#003580;margin-left:10px}
+        footer{margin-top:30px;text-align:center;font-size:0.7rem;color:#aaa}
+        @media (max-width:700px){th,td{font-size:0.7rem;padding:8px 6px}.stat-card .number{font-size:1.5rem}}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔧 LiteBite Admin Panel</h1>
+    <p>Welcome, Lucky 👑 | <a href="#" onclick="logout()">Logout (clear session)</a></p>
+    <div class="stats" id="stats"></div>
+    <div style="margin-bottom:15px">
+        <button onclick="refreshOrders()">🔄 Refresh</button>
+        <button class="sync-btn" onclick="syncAllWithBot()">🤖 Sync all statuses with Telegram bot</button>
+    </div>
+    <div class="order-table" id="ordersTable"></div>
+    <footer>© 2026 LiteBite · Admin panel for order management.</footer>
+</div>
+
+<script>
+    // ----- CONFIGURATION -----
+    // IMPORTANT: This MUST match the ADMIN_SECRET you set on Render
+    const ADMIN_SECRET = "9f7d3a1b8c4e2f5a7d9f2k3m";
+    const BOT_API_URL = "https://litebite-bot.onrender.com";
+
+    // ----- Helper functions -----
+    function getOrders() {
+        return JSON.parse(localStorage.getItem('lb_orders') || '[]');
+    }
+
+    function saveOrders(orders) {
+        localStorage.setItem('lb_orders', JSON.stringify(orders));
+    }
+
+    async function syncWithBot(orderNum, status) {
+        try {
+            const response = await fetch(`${BOT_API_URL}/admin/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderNum, status, secret: ADMIN_SECRET })
+            });
+            if (!response.ok) console.warn(`Bot sync failed for ${orderNum}`);
+            const data = await response.json();
+            if (!data.ok) console.warn(`Bot returned error for ${orderNum}`);
+        } catch (err) {
+            console.warn("Bot not reachable", err);
+        }
+    }
+
+    async function syncAllWithBot() {
+        const orders = getOrders();
+        for (const order of orders) {
+            await syncWithBot(order.num, order.status);
+        }
+        alert("Sync attempted for all orders. Check browser console if any failed.");
+    }
+
+    function updateOrderStatus(orderNum, newStatus) {
+        let orders = getOrders();
+        const index = orders.findIndex(o => o.num === orderNum);
+        if (index !== -1) {
+            orders[index].status = newStatus;
+            saveOrders(orders);
+            refreshOrders();
+            syncWithBot(orderNum, newStatus);
+        }
+    }
+
+    function refreshOrders() {
+        const orders = getOrders();
+        const totalOrders = orders.length;
+        const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+        const pending = orders.filter(o => o.status === 'pending').length;
+        const ready = orders.filter(o => o.status === 'ready').length;
+        const collected = orders.filter(o => o.status === 'collected').length;
+
+        document.getElementById('stats').innerHTML = `
+            <div class="stat-card"><h3>Total Orders</h3><div class="number">${totalOrders}</div></div>
+            <div class="stat-card"><h3>Revenue</h3><div class="number">R${totalRevenue}</div></div>
+            <div class="stat-card"><h3>Pending</h3><div class="number">${pending}</div></div>
+            <div class="stat-card"><h3>Ready</h3><div class="number">${ready}</div></div>
+            <div class="stat-card"><h3>Collected</h3><div class="number">${collected}</div></div>
+        `;
+
+        let html = `<table><thead><tr>
+            <th>Order #</th><th>Date</th><th>Customer</th><th>Phone</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Actions</th>
+        </tr></thead><tbody>`;
+
+        orders.forEach(order => {
+            const statusClass = `status-${order.status}`;
+            html += `<tr>
+                <td><strong>${order.num}</strong></td>
+                <td>${order.date}</td>
+                <td>${order.name}</td>
+                <td>${order.phone}</td>
+                <td>${order.items.join('<br>')}</td>
+                <td>R${order.total}</td>
+                <td>${order.pay === 'eft' ? '💳 EFT' : '💵 Cash'}</td>
+                <td><span class="status-badge ${statusClass}">${order.status}</span></td>
+                <td>
+                    ${order.status !== 'ready' ? `<button onclick="updateOrderStatus('${order.num}', 'ready')">Mark Ready</button>` : ''}
+                    ${order.status !== 'collected' ? `<button class="btn-collected" onclick="updateOrderStatus('${order.num}', 'collected')">Mark Collected</button>` : ''}
+                </td>
+            </tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('ordersTable').innerHTML = html;
+    }
+
+    // Simple session: keep logged in for this browser session only
+    function logout() {
+        localStorage.removeItem('admin_allowed');
+        location.reload();
+    }
+
+    // Optional password prompt – you can remove this if you rely only on the secret URL
+    if (!localStorage.getItem('admin_allowed')) {
+        let pwd = prompt("Enter admin password:");
+        if (pwd === "luckylite") {   // change this password
+            localStorage.setItem('admin_allowed', 'true');
+        } else {
+            document.body.innerHTML = "<h2>Access Denied</h2>";
+            throw new Error("Unauthorized");
+        }
+    }
+
+    refreshOrders();
+</script>
+</body>
+</html>
