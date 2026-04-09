@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LiteBite Fast Food</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f0fafa;--card:#fff;--brand:#2abfb0;--brand-dark:#1a9e91;--brand-light:#d4f5f2;
+  --coal:#1a1a18;--sub:#5a6b6a;--border:#d8eeed;--yellow:#f9d835;--yellow-dark:#e0b800;
+  --red:#e74c3c;--nmu:#003580;--nmu-light:#e8eef8;--radius:14px;--radius-sm:8px;
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--coal)}
+#app{min-height:100vh;display:flex;flex-direction:column}
+
+header{position:sticky;top:0;z-index:40;background:var(--coal);padding:0 1.5rem}
+.header-inner{max-width:1100px;margin:0 auto;height:62px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:60px;height:60px;object-fit:contain}
+.logo-name{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;color:#fff;letter-spacing:-0.02em}
+.logo-sub{font-size:0.62rem;color:#aaa;text-transform:uppercase;letter-spacing:0.1em}
+.cart-btn{background:var(--yellow);color:var(--coal);border:none;padding:0.5rem 1.2rem;border-radius:var(--radius-sm);font-family:'Syne',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:8px;position:relative;transition:background 0.2s}
+.cart-btn:hover{background:var(--yellow-dark)}
+.cart-count{position:absolute;top:-8px;right:-8px;background:var(--red);color:#fff;width:20px;height:20px;border-radius:50%;font-size:0.7rem;font-weight:700;display:none;align-items:center;justify-content:center}
+
+.hero{background:var(--coal);padding:2.5rem 1.5rem 2rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-40px;right:-40px;width:220px;height:220px;background:var(--brand);opacity:0.12;border-radius:50%}
+.hero-inner{max-width:1100px;margin:0 auto;position:relative;z-index:1}
+.hero-inner h2{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,5vw,3rem);font-weight:800;color:#fff;letter-spacing:-0.03em;line-height:1.05}
+.hero-inner h2 span{color:var(--brand)}
+.hero-inner p{margin-top:0.6rem;color:#aaa;font-size:0.92rem;font-weight:300}
+.hero-pills{display:flex;gap:0.5rem;margin-top:1.25rem;flex-wrap:wrap}
+.pill{padding:0.3rem 0.85rem;border-radius:100px;font-size:0.73rem;font-weight:500;border:1.5px solid}
+.pill.teal{background:rgba(42,191,176,0.15);border-color:var(--brand);color:var(--brand)}
+.pill.yellow{background:rgba(249,216,53,0.15);border-color:var(--yellow);color:var(--yellow)}
+.pill.blue{background:rgba(0,53,128,0.35);border-color:#4a7fd4;color:#90b8f8}
+
+.order-banner{background:var(--yellow);padding:0.6rem 1.5rem}
+.order-banner-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.order-banner span{font-family:'Syne',sans-serif;font-weight:700;font-size:0.78rem;color:var(--coal)}
+
+.nmu-banner{background:var(--nmu);padding:0.75rem 1.5rem}
+.nmu-banner-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap}
+.nmu-badge-pill{background:#fff;color:var(--nmu);font-family:'Syne',sans-serif;font-weight:800;font-size:0.68rem;padding:0.2rem 0.6rem;border-radius:4px;text-transform:uppercase;letter-spacing:0.05em;flex-shrink:0}
+.nmu-banner p{color:#a8c4f0;font-size:0.78rem;font-weight:300}
+.nmu-banner p strong{color:#fff;font-weight:600}
+
+nav.cats{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:62px;z-index:30}
+.cats-inner{max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;gap:0.35rem;overflow-x:auto;scrollbar-width:none;height:50px;align-items:center}
+.cats-inner::-webkit-scrollbar{display:none}
+.cat-btn{white-space:nowrap;padding:0.35rem 1rem;border-radius:100px;font-size:0.82rem;font-weight:500;cursor:pointer;border:1.5px solid transparent;background:transparent;color:var(--sub);font-family:'DM Sans',sans-serif;transition:all 0.15s;display:flex;align-items:center;gap:5px}
+.cat-btn:hover{background:var(--brand-light);color:var(--brand-dark)}
+.cat-btn.active{background:var(--brand);color:#fff}
+.nmu-dot{width:7px;height:7px;background:var(--nmu);border-radius:50%}
+.cat-btn.active .nmu-dot{background:#fff}
+
+main{flex:1;max-width:1100px;margin:0 auto;width:100%;padding:1.5rem}
+
+.nmu-section-box{background:var(--nmu-light);border:1.5px solid #b8cef0;border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;gap:0.75rem;align-items:flex-start}
+.nmu-section-box h4{font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;color:var(--nmu);margin-bottom:0.2rem}
+.nmu-section-box p{font-size:0.77rem;color:#4a6fa8;font-weight:300;line-height:1.5}
+
+.sec-label{font-family:'Syne',sans-serif;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--sub);margin-bottom:1rem}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1rem}
+
+.menu-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:transform 0.18s,box-shadow 0.18s}
+.menu-card.is-nmu{border-color:#b8cef0}
+.menu-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(42,191,176,0.14)}
+.menu-card.is-nmu:hover{box-shadow:0 10px 28px rgba(0,53,128,0.1)}
+.card-img{height:295px;display:flex;align-items:center;justify-content:center;position:relative;background:linear-gradient(135deg,var(--brand-light),#e8faf8);overflow:hidden}
+.card-img img{width:100%;height:100%;object-fit:cover;display:block}
+.menu-card.is-nmu .card-img{background:linear-gradient(135deg,var(--nmu-light),#dce8f8)}
+.cbadge{position:absolute;top:8px;left:8px;font-size:0.62rem;font-weight:800;font-family:'Syne',sans-serif;padding:0.2rem 0.55rem;border-radius:100px;text-transform:uppercase;letter-spacing:0.04em;z-index:2}
+.cb-nmu{background:var(--nmu);color:#fff}
+.cb-pop{background:var(--brand);color:#fff}
+.cb-top{background:var(--yellow);color:var(--coal)}
+.cb-loaded{background:var(--red);color:#fff}
+.card-body{padding:0.85rem 1rem}
+.card-cat{font-size:0.68rem;color:var(--brand);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.2rem}
+.menu-card.is-nmu .card-cat{color:var(--nmu)}
+.card-name{font-family:'Syne',sans-serif;font-weight:700;font-size:0.92rem;margin-bottom:0.2rem;line-height:1.25}
+.card-desc{font-size:0.73rem;color:var(--sub);font-weight:300;margin-bottom:0.75rem;line-height:1.4}
+.card-footer{display:flex;align-items:center;justify-content:space-between}
+.card-price{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem}
+.add-btn{width:30px;height:30px;background:var(--brand);color:#fff;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:background 0.15s}
+.menu-card.is-nmu .add-btn{background:var(--nmu)}
+.add-btn:hover{opacity:0.85}
+
+.sides-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:0.5rem;margin-top:0.75rem}
+.side-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.7rem 0.85rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all 0.15s}
+.side-card:hover{border-color:var(--brand);background:var(--brand-light)}
+.side-price{font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;color:var(--brand)}
+
+.closed-banner{background:#e74c3c;padding:0.75rem 1.5rem;text-align:center}
+.closed-banner p{color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem}
+.closed-banner span{font-weight:400;font-size:0.78rem;opacity:0.85}
+.order-num{background:var(--coal);color:var(--yellow);font-family:'Syne',sans-serif;font-weight:800;font-size:0.8rem;padding:0.2rem 0.6rem;border-radius:4px;letter-spacing:0.05em}
+.status-badge{display:inline-block;padding:0.2rem 0.6rem;border-radius:100px;font-size:0.68rem;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.05em}
+.status-pending{background:#fff8e1;color:#7a6000;border:1px solid var(--yellow)}
+.status-ready{background:#e8faf8;color:var(--brand-dark);border:1px solid var(--brand)}
+.status-collected{background:#f0f0f0;color:#888;border:1px solid #ddd}
+.history-btn{background:transparent;border:1.5px solid rgba(255,255,255,0.3);color:#fff;padding:0.4rem 0.85rem;border-radius:var(--radius-sm);font-family:'Syne',sans-serif;font-weight:700;font-size:0.75rem;cursor:pointer;transition:all 0.15s}
+.history-btn:hover{background:rgba(255,255,255,0.1)}
+.history-panel{position:fixed;inset:0;z-index:60;background:#fff;transform:translateX(100%);transition:transform 0.3s ease;display:flex;flex-direction:column}
+.history-panel.open{transform:translateX(0)}
+.history-top{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--coal)}
+.history-top h3{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:#fff}
+.history-body{flex:1;overflow:auto;padding:1.5rem}
+.history-search{display:flex;gap:0.5rem;margin-bottom:1.5rem}
+.history-search input{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.65rem 0.85rem;font-family:'DM Sans',sans-serif;font-size:0.87rem;color:var(--coal);outline:none;transition:border-color 0.15s}
+.history-search input:focus{border-color:var(--brand)}
+.history-search button{background:var(--brand);color:#fff;border:none;padding:0.65rem 1rem;border-radius:var(--radius-sm);font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer}
+.history-order{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem}
+.history-order-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem}
+.history-order-num{font-family:'Syne',sans-serif;font-weight:800;font-size:0.88rem;color:var(--coal)}
+.history-order-date{font-size:0.72rem;color:var(--sub)}
+.history-order-items{font-size:0.8rem;color:var(--sub);margin-bottom:0.5rem;line-height:1.5}
+.history-order-footer{display:flex;align-items:center;justify-content:space-between}
+.history-order-total{font-family:'Syne',sans-serif;font-weight:800;font-size:0.95rem;color:var(--brand)}
+
+.modal{position:fixed;bottom:0;left:0;right:0;z-index:60;background:#fff;border-radius:var(--radius) var(--radius) 0 0;max-height:92vh;overflow:auto;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.34,1.28,0.64,1)}
+.modal.open{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0.75rem auto 0}
+.modal-hdr{padding:1rem 1.5rem 0.75rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;border-bottom:1px solid var(--border)}
+.modal-cat{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.15rem}
+.modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--coal)}
+.modal-price{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;flex-shrink:0}
+.modal-body{padding:1rem 1.5rem 1.5rem}
+.emoji-big{font-size:4rem;text-align:center;margin-bottom:0.75rem;line-height:1}
+
+.info-box{border-radius:var(--radius-sm);padding:0.65rem 0.85rem;margin-bottom:1rem;font-size:0.78rem;line-height:1.5}
+.info-nmu{background:var(--nmu-light);border:1.5px solid #b8cef0;color:#2a4f8a}
+.info-nmu strong{color:var(--nmu);font-weight:700}
+.info-collect{background:#fff8e1;border:1.5px solid #f9d835;color:#7a6000}
+.info-collect strong{font-weight:700}
+
+.ing-block{margin-bottom:1.2rem}
+.ing-block-label{font-family:'Syne',sans-serif;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--sub);display:flex;align-items:center;justify-content:space-between;margin-bottom:0.55rem}
+.ing-block-label em{font-weight:400;font-size:0.68rem;color:#bbb;font-style:normal;text-transform:none;letter-spacing:0}
+.removed-msg{font-size:0.72rem;color:var(--red);min-height:18px;margin-bottom:0.35rem;font-style:italic}
+.ing-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.38rem}
+.ing-item{display:flex;align-items:center;gap:0.45rem;border-radius:var(--radius-sm);padding:0.48rem 0.7rem;cursor:pointer;border:1.5px solid transparent;transition:all 0.15s;font-size:0.8rem;user-select:none}
+.ing-item input{width:14px;height:14px;flex-shrink:0;cursor:pointer}
+.ing-included{background:var(--bg)}
+.ing-included:has(input:checked){background:var(--brand-light);border-color:var(--brand)}
+.ing-included:has(input:not(:checked)){background:#fff0f0;border-color:#ffcccc;color:#bbb;text-decoration:line-through}
+.ing-included input{accent-color:var(--brand)}
+.ing-extra{background:var(--bg)}
+.ing-extra:has(input:checked){background:var(--nmu-light);border-color:#b8cef0}
+.ing-extra input{accent-color:var(--nmu)}
+
+.qty-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+.qty-label{font-size:0.78rem;font-weight:500;color:var(--sub);text-transform:uppercase;letter-spacing:0.06em}
+.qty-ctrl{display:flex;align-items:center;gap:0.7rem;background:var(--bg);border-radius:var(--radius-sm);padding:0.32rem 0.55rem}
+.qty-ctrl button{width:30px;height:30px;background:var(--coal);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;font-weight:700;transition:background 0.15s}
+.qty-ctrl button:hover{background:var(--brand)}
+.qty-ctrl span{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;min-width:24px;text-align:center}
+.note-field{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.6rem 0.85rem;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--coal);resize:none;outline:none;margin-bottom:1.2rem;transition:border-color 0.15s}
+.note-field:focus{border-color:var(--brand)}
+.add-cart-btn{width:100%;background:var(--brand);color:#fff;border:none;padding:0.9rem;border-radius:var(--radius-sm);font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;transition:opacity 0.2s}
+.add-cart-btn:hover{opacity:0.88}
+.add-cart-btn.nmu-btn{background:var(--nmu)}
+
+.cart-panel{position:fixed;right:0;top:0;bottom:0;width:min(420px,100vw);background:#fff;z-index:60;display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.3s ease;border-left:1px solid var(--border)}
+.cart-panel.open{transform:translateX(0)}
+.cart-top{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--coal)}
+.cart-top h3{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:#fff}
+.close-btn{width:32px;height:32px;background:rgba(255,255,255,0.1);border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:1rem;color:#fff;display:flex;align-items:center;justify-content:center}
+.cart-items{flex:1;overflow:auto;padding:1rem 1.5rem}
+.cart-empty{text-align:center;padding:3rem 1rem;color:var(--sub)}
+.cart-item{display:flex;gap:0.75rem;padding:0.85rem 0;border-bottom:1px solid var(--border)}
+.ci-emoji{font-size:2rem;width:44px;flex-shrink:0;text-align:center;line-height:1.3}
+.ci-info{flex:1;min-width:0}
+.ci-name{font-weight:500;font-size:0.88rem;margin-bottom:0.15rem}
+.ci-tag{display:inline-block;font-size:0.62rem;font-weight:700;padding:0.1rem 0.42rem;border-radius:100px;margin-left:4px;vertical-align:middle}
+.tag-nmu{background:var(--nmu-light);color:var(--nmu)}
+.tag-col{background:#fff8e1;color:#7a6000}
+.ci-sub{font-size:0.72rem;color:var(--sub);line-height:1.35;margin-top:2px}
+.ci-price{font-family:'Syne',sans-serif;font-weight:700;color:var(--brand);font-size:0.88rem;margin-top:0.2rem}
+.rm-btn{background:none;border:none;cursor:pointer;color:#ccc;font-size:0.9rem;padding:0.2rem;align-self:flex-start;flex-shrink:0;transition:color 0.15s}
+.rm-btn:hover{color:var(--red)}
+.cart-bottom{padding:1.25rem 1.5rem;border-top:1px solid var(--border)}
+.total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.total-label{font-size:0.83rem;color:var(--sub)}
+.total-amount{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem}
+.type-row{display:flex;gap:0.5rem;margin-bottom:1rem}
+.type-btn{flex:1;padding:0.55rem;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:0.73rem;cursor:pointer;transition:all 0.15s;color:var(--sub)}
+.type-btn.tc{background:#fff8e1;border-color:var(--yellow);color:#7a6000}
+.type-btn.tn{background:var(--nmu-light);border-color:#b8cef0;color:var(--nmu)}
+.fields{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.75rem}
+.fields input{background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.65rem 0.85rem;font-family:'DM Sans',sans-serif;font-size:0.87rem;color:var(--coal);outline:none;transition:border-color 0.15s}
+.fields input:focus{border-color:var(--brand)}
+.pay-note{background:#fff8e1;border:1px solid var(--yellow);border-radius:var(--radius-sm);padding:0.6rem 0.85rem;font-size:0.77rem;color:#7a6000;margin-bottom:1rem;line-height:1.5}
+.pay-note strong{font-weight:700;display:block;margin-bottom:0.15rem}
+.wa-btn{width:100%;background:#25d366;color:#fff;border:none;padding:0.85rem;border-radius:var(--radius-sm);font-family:'Syne',sans-serif;font-weight:800;font-size:0.92rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity 0.2s;margin-bottom:0.5rem}
+.wa-btn:hover{opacity:0.88}
+.call-row{display:flex;gap:0.5rem}
+.call-btn{flex:1;border:1.5px solid var(--border);background:#fff;padding:0.55rem 0.3rem;border-radius:var(--radius-sm);font-family:'Syne',sans-serif;font-weight:700;font-size:0.7rem;cursor:pointer;color:var(--coal);text-align:center;line-height:1.4;transition:all 0.15s}
+.call-btn:hover{background:var(--bg);border-color:var(--brand)}
+
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--coal);color:#fff;padding:0.65rem 1.25rem;border-radius:var(--radius-sm);font-size:0.85rem;font-weight:500;z-index:100;opacity:0;transition:all 0.25s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fadeUp 0.25s ease forwards;opacity:0}
+
+@media(max-width:600px){
+  .menu-grid{grid-template-columns:repeat(2,1fr)}
+  .ing-grid{grid-template-columns:1fr}
+  .sides-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <img src="IMG-20260407-WA0003.jpg" alt="LiteBite" class="logo-icon"> <div>
+      <div>
+        <div class="logo-name">LiteBite</div>
+        <div class="logo-sub">Fast Food · On the Go</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.5rem">
+        <button class="history-btn" onclick="toggleHistory()">📋Order Status</button>
+        <button class="cart-btn" onclick="toggleCart()">
+          🛍 Order <span class="cart-count" id="cartCount">0</span>
+        </button>
+      </div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <h2>Quick bites,<br><span>big flavour.</span></h2>
+    <p>Build your kota exactly how you like it and send your order via WhatsApp.</p>
+    <div class="hero-pills">
+      <span class="pill teal">Order before 12:30</span>
+      <span class="pill yellow">Delivery 13:30 – 14:20</span>
+      <span class="pill blue">🎓 NMU Campus Delivery</span>
+    </div>
+  </div>
+</div>
+
+<div class="order-banner">
+  <div class="order-banner-inner">
+    <span>📞 MR DELIVERY: 063 893 0467</span>
+    <span style="color:rgba(0,0,0,0.25)">|</span>
+    <span>🏠 RESTAURANT: 071 230 8271</span>
+    <span style="color:rgba(0,0,0,0.25)">|</span>
+    <span>🏦 TymeBank: 5102 9549 181</span>
+  </div>
+</div>
+
+<div class="nmu-banner">
+  <div class="nmu-banner-inner">
+    <span class="nmu-badge-pill">NMU</span>
+    <p>Qualification Kotas are <strong>delivered to NMU campus only</strong> — order before 12:30, delivery 13:30–14:20. All other items are <strong>collect only</strong> at the restaurant.</p>
+  </div>
+</div>
+
+<div id="closedBanner" style="display:none" class="closed-banner">
+  <p>🔴 We are currently CLOSED &nbsp;<span>Open 08:00 – 21:00 · Orders close at 12:30 for NMU delivery</span></p>
+</div>
+
+<nav class="cats">
+  <div class="cats-inner" id="catTabs"></div>
+</nav>
+
+<main><div id="menuContent"></div></main>
+
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<div class="modal" id="itemModal">
+  <div class="modal-handle"></div>
+  <div class="modal-hdr" id="modalHdr">
+    <div>
+      <div class="modal-cat" id="modalCat"></div>
+      <div class="modal-title" id="modalTitle"></div>
+    </div>
+    <div class="modal-price" id="modalPrice"></div>
+  </div>
+  <div class="modal-body" id="modalBody"></div>
+</div>
+
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-top">
+    <h3>🛍 Your Order</h3>
+    <button class="close-btn" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-bottom" id="cartBottom"></div>
+</div>
+
+<div class="history-panel" id="historyPanel">
+  <div class="history-top">
+    <h3>Order Status </h3>
+    <button class="close-btn" onclick="toggleHistory()">✕</button>
+  </div>
+  <div class="history-body">
+    <div class="history-search">
+      <input id="historyPhone" type="tel" placeholder="Enter your phone number" />
+      <button onclick="lookupOrders()">Search</button>
+    </div>
+    <div id="historyResults">
+      <div style="text-align:center;padding:2rem;color:var(--sub)">
+        <div style="font-size:2.5rem;margin-bottom:0.75rem">📋</div>
+        <p style="font-size:0.88rem">Enter your phone number to check your order status</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- SIMPLE FOOTER: COPYRIGHT + DEVELOPED BY LUCKY (CLICKABLE LINK) -->
+<footer style="background: var(--coal); padding: 1.2rem 1.5rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.08); margin-top: 2rem;">
+  <p style="font-size: 0.75rem; color: #888; font-family: 'DM Sans', sans-serif;">
+    © 2026 LiteBite Fast Food · Developed by 
+    <strong style="color: var(--brand); font-weight: 600;">
+      <a href="https://lucky-web-fuse.netlify.app" target="_blank" rel="noopener noreferrer" style="color: var(--brand); text-decoration: none;">Lucky</a>
+    </strong>
+  </p>
+</footer>
+
+</div> <!-- closes #app -->
+
+<script>
+// ---------- MENU WITH IMAGES ----------
+const MENU = [
+  // QUALIFICATION KOTAS — NMU delivery
+  {cat:"Qualification Kotas",nmu:true,name:"Certificate",price:27,emoji:"🎓",badge:"NMU",
+   img:"IMG-20260402-WA0015(1).jpg",
+   ing:["Bread","Greens","Vienna","Spiced Fries","Cheese"],
+   extras:["Atchar +R5","Fried Egg +R4","Polony +R3","Extra Vienna +R10","Sauce"]},
+  {cat:"Qualification Kotas",nmu:true,name:"Diploma",price:35,emoji:"🎓",badge:"NMU",
+   img:"https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=300&h=200&fit=crop",
+   ing:["Bread","Greens","Half Russian","Half Vienna","Spiced Fries","Cheese","Egg"],
+   extras:["Atchar +R5","Polony +R3","Extra Cheese +R4","Sauce"]},
+  {cat:"Qualification Kotas",nmu:true,name:"Degree",price:40,emoji:"🎓",badge:"NMU",
+   img:"IMG-20260402-WA0022.jpg",
+   ing:["Bread","Greens","Russian","Vienna","Egg","Cheese","Spiced Fries","Polony"],
+   extras:["Atchar +R5","Extra Egg +R4","Extra Cheese +R4","Sauce"]},
+  {cat:"Qualification Kotas",nmu:true,name:"Honours",price:57,emoji:"🏆",badge:"TOP",
+   img:"IMG-20260402-WA0017.jpg",
+   ing:["Bread","Greens","Russian","Vienna","Beef Patty","Egg","Polony","Spiced Fries","Cheese"],
+   extras:["Atchar +R5","Extra Egg +R4","Extra Cheese +R4","Extra Russian +R15","Sauce"]},
+
+  // KOTAS — collect
+  {cat:"Kotas",nmu:false,name:"Kiddies Kota",price:15,emoji:"🥖",badge:"",
+   img:"IMG-20260402-WA0030.jpg",
+   ing:["Bread","Polony","Spiced Fries"],
+   extras:["Cheese +R4","Atchar +R5","Greens +R2","Egg +R4","Vienna +R10"]},
+  {cat:"Kotas",nmu:false,name:"Medium Kota",price:25,emoji:"🥖",badge:"",
+   img:"IMG-20260402-WA0015(1).jpg",
+   ing:["Bread","Vienna","Spiced Fries","Cheese"],
+   extras:["Atchar +R5","Greens +R2","Egg +R4","Polony +R3","Russian +R15"]},
+  {cat:"Kotas",nmu:false,name:"Large Kota",price:30,emoji:"🥖",badge:"POPULAR",
+   img:"IMG-20260402-WA0012.jpg",
+   ing:["Bread","Greens","Spiced Fries","Half Russian","Half Vienna","Egg","Polony"],
+   extras:["Cheese +R4","Atchar +R5","Extra Russian +R15","Sauce"]},
+  {cat:"Kotas",nmu:false,name:"Cheesy Large",price:40,emoji:"🧀",badge:"",
+   img:"IMG-20260402-WA0018.jpg",
+   ing:["Bread","Spiced Fries","Greens","Full Russian","Full Vienna","Double Cheese","Egg"],
+   extras:["Atchar +R5","Polony +R3","Extra Egg +R4","Sauce"]},
+  {cat:"Kotas",nmu:false,name:"Kota Burger",price:55,emoji:"👑",badge:"LOADED",
+   img:"IMG-20260402-WA0017.jpg",
+   ing:["Bread","Russian","Vienna","Egg","Burger Patty","Cheese","Polony","Spiced Fries"],
+   extras:["Atchar +R5","Greens +R2","Extra Cheese +R4","Sauce"]},
+  {cat:"Kotas",nmu:false,name:"Loaded Chow",price:45,emoji:"🌪️",badge:"",
+   img:"Screenshot_2026-04-09-19-54-48-266_com.whatsapp.jpg",
+   ing:["Half Bread","Spiced Fries","Surprise Fillings","Sauces"],
+   extras:["Extra Fries +R15","Extra Sauce"]},
+
+  // BURGERS
+  {cat:"Burgers",nmu:false,name:"Kiddies Burger",price:30,emoji:"🍔",badge:"",
+   img:"IMG-20260408-WA0032.jpg",
+   ing:["Bun","Burger Patty","Cheese","Spiced Fries"],
+   extras:["Lettuce","Tomato","Sauce","Atchar +R5","Extra Cheese +R4"]},
+  {cat:"Burgers",nmu:false,name:"Sandwich",price:35,emoji:"🥪",badge:"",
+   img:"IMG-20260408-WA0036.jpg",
+   ing:["Bread","Vienna","Egg","Cheese","Spiced Fries"],
+   extras:["Greens +R2","Atchar +R5","Polony +R3","Extra Vienna +R10","Sauce"]},
+
+  // FRIES
+  {cat:"Fries",nmu:false,name:"Small Spiced Fries",price:25,emoji:"🍟",badge:"",
+   img:"https://images.unsplash.com/photo-1585109649139-366815a0d713?w=300&h=200&fit=crop",
+   ing:["Spiced Fries"],extras:["Ketchup","Chilli Sauce","Cheese Sauce"]},
+  {cat:"Fries",nmu:false,name:"Large Spiced Fries",price:45,emoji:"🍟",badge:"LARGE",
+   img:"https://images.unsplash.com/photo-1585109649139-366815a0d713?w=300&h=200&fit=crop",
+   ing:["Spiced Fries"],extras:["Ketchup","Chilli Sauce","Cheese Sauce"]},
+  {cat:"Fries",nmu:false,name:"Russian Vienna Fries",price:50,emoji:"🍟",badge:"LOADED",
+   img:"IMG-20260408-WA0033.jpg",
+   ing:["Spiced Fries","Russian","Vienna"],extras:["Atchar +R5","Chilli Sauce","Cheese Sauce"]},
+];
+
+const SIDES=[
+  {name:"Short Russian",price:15,emoji:"🌭"},{name:"Vienna",price:10,emoji:"🌭"},
+  {name:"Burger Patty",price:20,emoji:"🥩"},{name:"Kota Bread",price:5,emoji:"🍞"},
+  {name:"Fried Egg",price:4,emoji:"🍳"},{name:"Cheese Slice",price:4,emoji:"🧀"},
+  {name:"Atchar",price:5,emoji:"🫙"},{name:"Polony Slice",price:3,emoji:"🥓"},
+  {name:"Greens",price:2,emoji:"🥬"},
+];
+
+// ── HOURS & STATUS
+const OPEN_HOUR = 8;
+const CLOSE_HOUR = 21;
+const CUTOFF_HOUR = 12;
+const CUTOFF_MIN = 30;
+
+function isOpen(){
+  const now = new Date();
+  const h = now.getHours();
+  return h >= OPEN_HOUR && h < CLOSE_HOUR;
+}
+
+function isPastCutoff(){
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes();
+  return h > CUTOFF_HOUR || (h === CUTOFF_HOUR && m >= CUTOFF_MIN);
+}
+
+function checkHours(){
+  const banner = document.getElementById('closedBanner');
+  if(!isOpen()){
+    banner.style.display = 'block';
+    document.querySelectorAll('.add-btn').forEach(b=>{b.disabled=true;b.style.opacity='0.4';b.style.cursor='not-allowed';});
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+// ── ORDER NUMBER GENERATOR
+function generateOrderNum(){
+  const count = (parseInt(localStorage.getItem('lb_order_count')||'0') + 1);
+  localStorage.setItem('lb_order_count', count);
+  return `LB${String(count).padStart(3,'0')}`;
+}
+
+// ── ORDER HISTORY (stored in localStorage)
+function saveOrder(orderNum, name, phone, items, total, payMethod){
+  const orders = JSON.parse(localStorage.getItem('lb_orders')||'[]');
+  orders.unshift({
+    num: orderNum,
+    name,
+    phone,
+    items: items.map(i=>`${i.emoji} ${i.name} ×${i.qty}`),
+    total,
+    pay: payMethod,
+    date: new Date().toLocaleString('en-ZA',{dateStyle:'medium',timeStyle:'short'}),
+    status: 'pending'
+  });
+  localStorage.setItem('lb_orders', JSON.stringify(orders));
+}
+
+// Helper: parse extra cost
+function getExtraCost(extraStr) {
+  const match = extraStr.match(/\+R(\d+)/);
+  return match ? parseInt(match[1]) : 0;
+}
+
+// Single lookupOrders function (unified)
+function lookupOrders(){
+  const phone = document.getElementById('historyPhone').value.trim().replace(/\s/g,'');
+  const results = document.getElementById('historyResults');
+  if(!phone){ showToast('Enter your phone number'); return; }
+  const orders = JSON.parse(localStorage.getItem('lb_orders')||'[]');
+  const mine = orders.filter(o=>o.phone.replace(/\s/g,'').includes(phone.replace('+27','0').replace(/^27/,'0')));
+  if(!mine.length){
+    results.innerHTML=`<div style="text-align:center;padding:2rem;color:var(--sub)"><div style="font-size:2rem;margin-bottom:0.75rem">🔍</div><p style="font-size:0.88rem">No orders found for this number</p></div>`;
+    return;
+  }
+  const statusLabel={pending:'⏳ Pending',ready:'✅ Ready',collected:'📦 Collected'};
+  const statusClass={pending:'status-pending',ready:'status-ready',collected:'status-collected'};
+  results.innerHTML = mine.map(o=>`
+    <div class="history-order">
+      <div class="history-order-top">
+        <span class="history-order-num">#${o.num}</span>
+        <span class="status-badge ${statusClass[o.status]||'status-pending'}">${statusLabel[o.status]||'⏳ Pending'}</span>
+      </div>
+      <div class="history-order-date">${o.date} · ${o.pay==='eft'?'💳 EFT':'💵 Cash'}</div>
+      <div class="history-order-items">${o.items.join('<br>')}</div>
+      <div class="history-order-footer">
+        <span class="history-order-total">R${o.total}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleHistory(){
+  const p = document.getElementById('historyPanel');
+  const open = !p.classList.contains('open');
+  if(open){ p.classList.add('open'); document.body.style.overflow='hidden'; }
+  else { p.classList.remove('open'); document.body.style.overflow=''; }
+}
+
+const CATS=["All","Kotas","Burgers","Fries","Qualification Kotas"];
+let activeCat="All",cart=[],cur=null,checkoutType="collect";
+
+function renderTabs(){
+  const el=document.getElementById('catTabs');
+  el.innerHTML='';
+  CATS.forEach(cat=>{
+    const isN=cat==="Qualification Kotas";
+    const b=document.createElement('button');
+    b.className='cat-btn'+(activeCat===cat?' active':'');
+    b.innerHTML=isN?`<span class="nmu-dot"></span>${cat}`:cat;
+    b.onclick=()=>{activeCat=cat;renderTabs();renderMenu();};
+    el.appendChild(b);
+  });
+}
+
+function badgeClass(b){
+  if(b==='NMU'||b==='TOP') return 'cb-nmu';
+  if(b==='POPULAR') return 'cb-pop';
+  if(b==='LOADED') return 'cb-loaded';
+  if(b==='LARGE') return 'cb-pop';
+  return '';
+}
+
+function cardHTML(item,i){
+  const imgHtml = item.img 
+    ? `<img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+    : '';
+  return `
+    <div class="menu-card ${item.nmu?'is-nmu':''} fu" style="animation-delay:${i*35}ms" onclick="openModal(${MENU.indexOf(item)})">
+      <div class="card-img">
+        ${imgHtml}
+        <span style="display:${item.img ? 'none' : 'flex'}">${item.emoji}</span>
+        ${item.badge?`<span class="cbadge ${badgeClass(item.badge)}">${item.badge}</span>`:''}
+      </div>
+      <div class="card-body">
+        <div class="card-cat">${item.cat}</div>
+        <div class="card-name">${item.name}</div>
+        <div class="card-desc">${item.ing.join(' · ')}</div>
+        <div class="card-footer">
+          <span class="card-price">R${item.price}</span>
+          <button class="add-btn" onclick="quickAdd(event,${MENU.indexOf(item)})">+</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderMenu(){
+  const wrap=document.getElementById('menuContent');
+  const showAll=activeCat==='All';
+  const catsToShow=showAll?CATS.filter(c=>c!=='All'):[activeCat];
+  let html='';
+
+  catsToShow.forEach(cat=>{
+    const items=MENU.filter(i=>i.cat===cat);
+    if(!items.length) return;
+    const isN=cat==="Qualification Kotas";
+    html+=`<div style="margin-bottom:2rem">`;
+    if(isN){
+      html+=`
+        <div class="nmu-section-box">
+          <div style="font-size:1.5rem;flex-shrink:0">🎓</div>
+          <div>
+            <h4>Qualification Kotas — NMU Students</h4>
+            <p>Delivered to <strong>NMU campus only</strong>. Order before 12:30 · Delivery 13:30–14:20.<br>
+            Remove or add any ingredient to build your kota exactly how you want it.</p>
+          </div>
+        </div>`;
+    } else {
+      html+=`<div class="sec-label">${cat} <span style="font-weight:400;color:#ccc;text-transform:none;letter-spacing:0;font-size:0.65rem">· Collect only</span></div>`;
+    }
+    html+=`<div class="menu-grid">${items.map((item,i)=>cardHTML(item,i)).join('')}</div>`;
+    html+=`</div>`;
+  });
+
+  if(showAll||['Kotas','Fries','Burgers'].includes(activeCat)){
+    html+=`
+      <div style="margin-bottom:2rem">
+        <div class="sec-label">Add-On Sides <span style="font-weight:400;color:#ccc;text-transform:none;letter-spacing:0;font-size:0.65rem">· tap to add</span></div>
+        <div class="sides-grid">
+          ${SIDES.map(s=>`
+            <div class="side-card" onclick="addSide('${s.name}',${s.price},'${s.emoji}')">
+              <span style="font-size:0.85rem">${s.emoji} <span style="font-size:0.82rem;font-weight:500">${s.name}</span></span>
+              <span class="side-price">R${s.price}</span>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+  wrap.innerHTML=html;
+}
+
+// MODAL
+function openModal(idx){
+  const item=MENU[idx];
+  cur={...item,qty:1,removed:[],addedExtras:[],note:''};
+  document.getElementById('modalCat').textContent=item.cat;
+  document.getElementById('modalCat').style.color=item.nmu?'var(--nmu)':'var(--brand)';
+  document.getElementById('modalTitle').textContent=item.name;
+  document.getElementById('modalPrice').style.color=item.nmu?'var(--nmu)':'var(--brand)';
+  renderModal();
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('itemModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function renderModal(){
+  const item = cur;
+  const extraCost = cur.addedExtras.reduce((sum, ex) => sum + getExtraCost(ex), 0);
+  const unitTotal = item.price + extraCost;
+  const total = unitTotal * cur.qty;
+  
+  document.getElementById('modalPrice').textContent = `R${total}`;
+  const removedText = cur.removed.length ? `❌ Removing: ${cur.removed.join(', ')}` : '';
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="emoji-big">${item.emoji}</div>
+    ${item.nmu
+      ? `<div class="info-box info-nmu">🎓 <strong>NMU Campus Delivery</strong> — Order before 12:30, delivered 13:30–14:20.<br>TymeBank: <strong>5102 9549 181</strong> — send proof of payment.</div>`
+      : `<div class="info-box info-collect">🏠 <strong>Collect Only</strong> — Come pick up at the restaurant.<br>Call us: <strong>071 230 8271</strong></div>`}
+
+    <div class="ing-block">
+      <div class="ing-block-label">Ingredients <em>Uncheck to remove</em></div>
+      <div class="removed-msg">${removedText}</div>
+      <div class="ing-grid">
+        ${item.ing.map(g => `
+          <label class="ing-item ing-included">
+            <input type="checkbox" ${!cur.removed.includes(g) ? 'checked' : ''} onchange="toggleIng('${g.replace(/'/g, "\\'")}', false)">
+            ${g}
+          </label>`).join('')}
+      </div>
+    </div>
+
+    ${item.extras.length ? `
+      <div class="ing-block">
+        <div class="ing-block-label">Add Extras <em>Tick to add</em></div>
+        <div class="ing-grid">
+          ${item.extras.map(ex => `
+            <label class="ing-item ing-extra">
+              <input type="checkbox" ${cur.addedExtras.includes(ex) ? 'checked' : ''} onchange="toggleIng('${ex.replace(/'/g, "\\'")}', true)">
+              ${ex}
+            </label>`).join('')}
+        </div>
+      </div>` : ''}
+
+    <div class="qty-row">
+      <span class="qty-label">Quantity</span>
+      <div class="qty-ctrl">
+        <button onclick="chQty(-1)">−</button>
+        <span>${cur.qty}</span>
+        <button onclick="chQty(1)">+</button>
+      </div>
+    </div>
+    <textarea class="note-field" rows="2" placeholder="Any special requests or notes..." oninput="cur.note = this.value">${cur.note || ''}</textarea>
+    <button class="add-cart-btn ${item.nmu ? 'nmu-btn' : ''}" onclick="addToCart()">
+      Add to Order — R${total}
+    </button>
+  `;
+}
+
+function toggleIng(v,isExtra){
+  if(isExtra){
+    const i=cur.addedExtras.indexOf(v);
+    i>-1?cur.addedExtras.splice(i,1):cur.addedExtras.push(v);
+  } else {
+    const i=cur.removed.indexOf(v);
+    i>-1?cur.removed.splice(i,1):cur.removed.push(v);
+  }
+  renderModal(); // re-render to update price
+}
+function chQty(d){cur.qty=Math.max(1,cur.qty+d);renderModal();}
+
+function closeAll(){
+  ['overlay','itemModal','cartPanel','historyPanel'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.classList.remove('open');
+  });
+  document.body.style.overflow='';cur=null;
+}
+
+function addToCart(){
+  const extraCost = cur.addedExtras.reduce((sum, ex) => sum + getExtraCost(ex), 0);
+  const finalUnitPrice = cur.price + extraCost;
+  
+  cart.push({
+    name: cur.name,
+    price: finalUnitPrice,
+    originalPrice: cur.price,
+    qty: cur.qty,
+    emoji: cur.emoji,
+    nmu: cur.nmu,
+    removed: [...cur.removed],
+    extras: [...cur.addedExtras],
+    note: cur.note
+  });
+  updateBadge();
+  closeAll();
+  showToast(`${cur.name} added with extras!`);
+}
+function quickAdd(e,idx){
+  e.stopPropagation();
+  const item=MENU[idx];
+  cart.push({name:item.name,price:item.price,qty:1,emoji:item.emoji,nmu:item.nmu,removed:[],extras:[],note:''});
+  updateBadge();showToast(`${item.name} added`);
+}
+function addSide(name,price,emoji){
+  cart.push({name,price,qty:1,emoji,nmu:false,removed:[],extras:[],note:''});
+  updateBadge();showToast(`${name} added`);
+}
+
+// CART
+function toggleCart(){
+  const open=!document.getElementById('cartPanel').classList.contains('open');
+  if(open){renderCart();document.getElementById('cartPanel').classList.add('open');document.getElementById('overlay').classList.add('open');document.body.style.overflow='hidden';}
+  else closeAll();
+}
+
+function renderCart(){
+  const itemsEl=document.getElementById('cartItems');
+  const bottomEl=document.getElementById('cartBottom');
+  if(!cart.length){
+    itemsEl.innerHTML=`<div class="cart-empty"><span style="font-size:3rem;display:block;margin-bottom:1rem">🛒</span><p>Your cart is empty.<br>Pick something from the menu!</p></div>`;
+    bottomEl.innerHTML='';return;
+  }
+  const total=cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const hasNmu=cart.some(i=>i.nmu);
+  const hasCol=cart.some(i=>!i.nmu);
+
+  itemsEl.innerHTML=cart.map((item,idx)=>`
+    <div class="cart-item">
+      <div class="ci-emoji">${item.emoji}</div>
+      <div class="ci-info">
+        <div class="ci-name">${item.name} <span style="color:var(--sub);font-weight:300">×${item.qty}</span>
+          <span class="ci-tag ${item.nmu?'tag-nmu':'tag-col'}">${item.nmu?'NMU Delivery':'Collect'}</span>
+        </div>
+        ${item.removed.length?`<div class="ci-sub" style="color:var(--red)">❌ No: ${item.removed.join(', ')}</div>`:''}
+        ${item.extras.length?`<div class="ci-sub">➕ ${item.extras.join(', ')}</div>`:''}
+        ${item.note?`<div class="ci-sub" style="font-style:italic">"${item.note}"</div>`:''}
+        <div class="ci-price">R${item.price*item.qty}</div>
+      </div>
+      <button class="rm-btn" onclick="removeItem(${idx})">✕</button>
+    </div>`).join('');
+
+  const typeRow= (hasNmu&&hasCol)
+    ?`<div class="type-row">
+        <button class="type-btn ${checkoutType==='collect'?'tc':''}" onclick="setType('collect')">🏠 I'm Collecting</button>
+        <button class="type-btn ${checkoutType==='nmu'?'tn':''}" onclick="setType('nmu')">🎓 NMU Delivery</button>
+      </div>`
+    : hasNmu
+      ?`<div style="background:var(--nmu-light);border:1px solid #b8cef0;border-radius:var(--radius-sm);padding:0.5rem 0.75rem;font-size:0.77rem;color:var(--nmu);font-weight:600;margin-bottom:1rem">🎓 NMU campus delivery</div>`
+      :`<div style="background:#fff8e1;border:1px solid var(--yellow);border-radius:var(--radius-sm);padding:0.5rem 0.75rem;font-size:0.77rem;color:#7a6000;font-weight:600;margin-bottom:1rem">🏠 Collect at restaurant</div>`;
+
+  bottomEl.innerHTML=`
+    <div class="total-row">
+      <span class="total-label">Total</span>
+      <span class="total-amount">R${total}</span>
+    </div>
+    ${typeRow}
+    <div class="fields">
+      <input id="cName" type="text" placeholder="Your full name" />
+      <input id="cPhone" type="tel" placeholder="Your phone number" />
+      ${hasNmu?`<input id="cRes" type="text" placeholder="NMU Residence / Building" />`:''}
+    </div>
+
+    <div style="margin-bottom:0.85rem">
+      <div style="font-family:'Syne',sans-serif;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--sub);margin-bottom:0.5rem">Payment Method</div>
+      <div style="display:flex;gap:0.5rem">
+        <button id="payEft" onclick="selectPay('eft')" style="flex:1;padding:0.65rem;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;transition:all 0.15s;color:var(--sub)">
+          💳 Pay Online (EFT)
+        </button>
+        <button id="payCash" onclick="selectPay('cash')" style="flex:1;padding:0.65rem;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;transition:all 0.15s;color:var(--sub)">
+          💵 Pay Cash
+        </button>
+      </div>
+    </div>
+
+    <div id="eftDetails" style="display:none;background:#fff8e1;border:1.5px solid var(--yellow);border-radius:var(--radius-sm);padding:0.65rem 0.85rem;font-size:0.78rem;color:#7a6000;margin-bottom:0.85rem;line-height:1.6">
+      <strong style="display:block;margin-bottom:0.2rem">🏦 EFT Payment Details</strong>
+      Bank: <strong>TymeBank</strong><br>
+      Account: <strong>5102 9549 181</strong><br>
+      <span style="color:var(--red);font-weight:600">⚠️ Send proof of payment on WhatsApp after ordering!</span>
+    </div>
+
+    <div id="cashDetails" style="display:none;background:#e8faf8;border:1.5px solid var(--brand);border-radius:var(--radius-sm);padding:0.65rem 0.85rem;font-size:0.78rem;color:#1a6b65;margin-bottom:0.85rem;line-height:1.6">
+      <strong style="display:block;margin-bottom:0.2rem">💵 Cash on Collection</strong>
+      Please have the exact amount ready.<br>
+      <strong>Total: R${total}</strong>
+    </div>
+
+    <button class="wa-btn" onclick="checkout()">
+      Place Order 🍔
+    </button>
+    <div class="call-row">
+      <button class="call-btn" onclick="window.open('tel:0638930467')">📞 Mr Delivery<br>063 893 0467</button>
+      <button class="call-btn" onclick="window.open('tel:0712308271')">🏠 Restaurant<br>071 230 8271</button>
+    </div>`;
+}
+
+function selectPay(method){
+  payMethod=method;
+  const eftBtn=document.getElementById('payEft');
+  const cashBtn=document.getElementById('payCash');
+  const eftDetails=document.getElementById('eftDetails');
+  const cashDetails=document.getElementById('cashDetails');
+  if(method==='eft'){
+    eftBtn.style.background='#fff8e1';eftBtn.style.borderColor='var(--yellow)';eftBtn.style.color='#7a6000';
+    cashBtn.style.background='#fff';cashBtn.style.borderColor='var(--border)';cashBtn.style.color='var(--sub)';
+    eftDetails.style.display='block';cashDetails.style.display='none';
+  } else {
+    cashBtn.style.background='var(--brand-light)';cashBtn.style.borderColor='var(--brand)';cashBtn.style.color='var(--brand-dark)';
+    eftBtn.style.background='#fff';eftBtn.style.borderColor='var(--border)';eftBtn.style.color='var(--sub)';
+    cashDetails.style.display='block';eftDetails.style.display='none';
+  }
+}
+
+function setType(t){checkoutType=t;renderCart();}
+function removeItem(idx){cart.splice(idx,1);updateBadge();renderCart();}
+
+let payMethod='';
+const RENDER_URL = 'https://litebite-bot.onrender.com';
+
+async function checkout(){
+  const name=(document.getElementById('cName')||{}).value?.trim();
+  const phone=(document.getElementById('cPhone')||{}).value?.trim();
+  const residence=(document.getElementById('cRes')||{}).value?.trim()||'';
+  if(!isOpen()){showToast('Sorry we are closed! Open 08:00–21:00');return;}
+  if(!name||!phone){showToast('Please enter your name and number');return;}
+  if(!payMethod){showToast('Please select a payment method');return;}
+
+  const orderNum = generateOrderNum();
+  const total = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const nmuItems = cart.filter(i=>i.nmu);
+
+  if(nmuItems.length && isPastCutoff()){
+    showToast('NMU orders closed after 12:30! Try tomorrow 🎓');
+    return;
+  }
+
+  saveOrder(orderNum, name, phone, cart, total, payMethod);
+
+  try {
+    showToast('Sending order... ⏳');
+    const response = await fetch(`${RENDER_URL}/order`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        orderNum, name, phone, residence,
+        items: cart,
+        total, payMethod
+      })
+    });
+    const result = await response.json();
+    if(result.ok){
+      cart=[];
+      payMethod='';
+      updateBadge();
+      closeAll();
+      showToast(`Order #${orderNum} sent! We'll contact you shortly 🎉`);
+    } else {
+      throw new Error('Server error');
+    }
+  } catch(err) {
+    console.error(err);
+    showToast('Error sending order. Please call us! 📞');
+  }
+}
+
+function updateBadge(){
+  const el=document.getElementById('cartCount');
+  const n=cart.reduce((s,i)=>s+i.qty,0);
+  el.textContent=n;el.style.display=n>0?'flex':'none';
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// Initial render
+renderTabs();
+renderMenu();
+checkHours();
+setInterval(checkHours,60000);
+</script>
+</body>
+</html>
