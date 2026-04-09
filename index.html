@@ -465,25 +465,51 @@ function getExtraCost(extraStr) {
 }
 
 // Single lookupOrders function (unified)
-function lookupOrders(){
-  const phone = document.getElementById('historyPhone').value.trim().replace(/\s/g,'');
+async function lookupOrders() {
+  const phone = document.getElementById('historyPhone').value.trim().replace(/\s/g, '');
   const results = document.getElementById('historyResults');
-  if(!phone){ showToast('Enter your phone number'); return; }
-  const orders = JSON.parse(localStorage.getItem('lb_orders')||'[]');
-  const mine = orders.filter(o=>o.phone.replace(/\s/g,'').includes(phone.replace('+27','0').replace(/^27/,'0')));
-  if(!mine.length){
-    results.innerHTML=`<div style="text-align:center;padding:2rem;color:var(--sub)"><div style="font-size:2rem;margin-bottom:0.75rem">🔍</div><p style="font-size:0.88rem">No orders found for this number</p></div>`;
+  if (!phone) {
+    showToast('Enter your phone number');
     return;
   }
-  const statusLabel={pending:'⏳ Pending',ready:'✅ Ready',collected:'📦 Collected'};
-  const statusClass={pending:'status-pending',ready:'status-ready',collected:'status-collected'};
-  results.innerHTML = mine.map(o=>`
+
+  // Get locally stored orders (full details)
+  const localOrders = JSON.parse(localStorage.getItem('lb_orders') || '[]');
+  const matchingOrders = localOrders.filter(o =>
+    o.phone.replace(/\s/g, '').includes(phone.replace('+27', '0').replace(/^27/, '0'))
+  );
+
+  if (matchingOrders.length === 0) {
+    results.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--sub)"><div style="font-size:2rem;margin-bottom:0.75rem">🔍</div><p style="font-size:0.88rem">No orders found for this number</p></div>`;
+    return;
+  }
+
+  // Fetch live status for each order from your bot
+  const updatedOrders = await Promise.all(
+    matchingOrders.map(async (order) => {
+      try {
+        const response = await fetch(`https://litebite-bot.onrender.com/status/${order.num}`);
+        const data = await response.json();
+        if (data.ok && data.status) {
+          order.status = data.status;  // override local status
+        }
+      } catch (err) {
+        console.warn(`Could not fetch status for ${order.num}`, err);
+      }
+      return order;
+    })
+  );
+
+  const statusLabel = { pending: '⏳ Pending', ready: '✅ Ready', collected: '📦 Collected' };
+  const statusClass = { pending: 'status-pending', ready: 'status-ready', collected: 'status-collected' };
+
+  results.innerHTML = updatedOrders.map(o => `
     <div class="history-order">
       <div class="history-order-top">
         <span class="history-order-num">#${o.num}</span>
-        <span class="status-badge ${statusClass[o.status]||'status-pending'}">${statusLabel[o.status]||'⏳ Pending'}</span>
+        <span class="status-badge ${statusClass[o.status] || 'status-pending'}">${statusLabel[o.status] || '⏳ Pending'}</span>
       </div>
-      <div class="history-order-date">${o.date} · ${o.pay==='eft'?'💳 EFT':'💵 Cash'}</div>
+      <div class="history-order-date">${o.date} · ${o.pay === 'eft' ? '💳 EFT' : '💵 Cash'}</div>
       <div class="history-order-items">${o.items.join('<br>')}</div>
       <div class="history-order-footer">
         <span class="history-order-total">R${o.total}</span>
